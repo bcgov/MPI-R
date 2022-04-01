@@ -5,7 +5,7 @@ output:
   flexdashboard::flex_dashboard: null
   orientation: columns
 css: style.css
-source_code: embed
+source_code: "https://github.com/bcgov/MPI-R"
 runtime: shiny
 resource_files:
 - processed_data/maps.rds

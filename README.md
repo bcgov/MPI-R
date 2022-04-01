@@ -12,24 +12,10 @@ MPI-R
 
 ### Usage
 
-Describe data being used (links), and how to run. Eg:
+To deploy updates to dashboard either: 
+1. type Rscript run_all.R at the command line and hit enter OR
+2. open the file run_all.R in Rstudio and hit the source button.
 
-There are four core scripts that are required for the analysis, they need to be run in order:
-
--   01\_clean.R
--   02\_analysis.R
--   03\_visualize.R
--   04\_output.R
-
-#### Example
-
-This is a basic example which shows you how to solve a common problem:
-
-``` r
-## basic example code
-```
-
-### Project Status
 
 ### Getting Help or Reporting an Issue
 
