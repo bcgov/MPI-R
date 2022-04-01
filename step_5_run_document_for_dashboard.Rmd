@@ -1,0 +1,201 @@
+---
+title: "British Columbia's Major Project Inventory"
+date: 'Last Update: `r format(Sys.time(), "%B %d, %Y")`'
+output:
+  flexdashboard::flex_dashboard: null
+  orientation: columns
+css: style.css
+source_code: embed
+runtime: shiny
+resource_files:
+- processed_data/maps.rds
+- processed_data/by_region_tables.rds
+- processed_data/by_region_plots.rds
+- processed_data/by_region_commentary.rds
+- processed_data/all_regions_tables.rds
+- processed_data/all_regions_plots.rds
+- processed_data/all_regions_commentary.rds
+---
+  
+```{r global, include=FALSE}
+#libraries----------
+library(DT)
+library(tidyverse)
+library(here)
+library(scales)
+library(tsibble)
+library(plotly)
+library(lubridate)
+library(ggsflabel)
+#load objects----------
+by_region_tables <- readRDS(here("processed_data","by_region_tables.rds"))
+all_regions_tables <- readRDS(here("processed_data","all_regions_tables.rds"))
+by_region_plots <- readRDS(here("processed_data","by_region_plots.rds"))
+all_regions_plots <- readRDS(here("processed_data","all_regions_plots.rds"))
+all_regions_commentary <- readRDS(here("processed_data","all_regions_commentary.rds"))
+by_region_commentary <- readRDS(here("processed_data","by_region_commentary.rds"))
+maps <- readRDS(here("processed_data","maps.rds"))
+#functions------------
+#Extractor function (retrieve cell) for all_regions_* dataframes---------- 
+extract_all_regions_cell <- function(df, name){
+  df <- df%>%
+    filter(thing_name==name)%>%
+    select(value)%>%
+    pull()
+  df<- df[[1]] 
+  if(is.data.frame(df)){
+    colnames(df) <- colnames(df)%>%
+    str_replace_all("_"," ")%>%
+    str_to_title()
+  }
+  return(df)
+}
+#Extractor function (retrieve cell) for by_region_* dataframes------------- 
+datatable_cell <- function(df, type, reg){
+  df <- df%>%
+    filter(region==reg)%>%
+    select(type)%>%
+    pull()
+  df<- df[[1]]
+  if(is.data.frame(df)){
+    colnames(df) <- colnames(df)%>%
+    str_replace_all("_"," ")%>%
+    str_to_title()
+  }
+  return(df)
+}
+```
+
+Maps:
+=====================================  
+ 
+ Inputs {.sidebar}
+-------------------------------------
+
+```{r}
+selectInput("map", label = "Which Map:",
+            choices = names(maps), selected = names(maps)[1])
+```
+
+* This dashboard contains Maps, Provincial and Regional analyses of Major Projects.
+* Specific visualizations can be picked from the input selector above.
+* The data for the Plots can downloaded from the Table tab. 
+
+Column 
+-----------------------------------------------------------------------
+  
+### MPI `r max(all_regions_tables[[2]][[2]]$quarter)`:
+  
+```{r}
+renderPlot({
+  maps[[input$map]]
+})%>%
+  bindCache(input$map)
+```
+
+Provincial Analysis:
+=====================================  
+ 
+ Inputs {.sidebar}
+-------------------------------------
+
+```{r}
+selectInput("name", label = "Which Data:",
+            choices = all_regions_tables$thing_name, selected = all_regions_tables$thing_name[1])
+
+renderUI({
+  HTML(extract_all_regions_cell(all_regions_commentary, input$name))
+})
+```
+
+Column {.tabset}
+-----------------------------------------------------------------------
+
+### Plot:
+
+```{r}
+renderPlotly({
+  extract_all_regions_cell(all_regions_plots, input$name)
+})%>%
+  bindCache(input$name)
+```
+
+### Table:
+  
+```{r}
+DT::renderDataTable(server=FALSE,{
+  extract_all_regions_cell(all_regions_tables, input$name)%>%
+    datatable(extensions = "Buttons", 
+              options = list(rownames = FALSE, 
+                             columnDefs = list(list(className = 'dt-center', targets = "_all")),
+                             paging = TRUE,
+                             scrollX=TRUE,
+                             scrollY=TRUE,
+                             searching = TRUE,
+                             ordering = TRUE,
+                             dom = 'Btip',
+                             buttons = list(
+                                list(extend = 'csv', filename =  paste("MPI-BC", input$name, sep = "-")),
+                                list(extend = 'excel', filename =  paste("MPI-BC", input$name, sep = "-"))
+                             ),
+                             pageLength=10, 
+                             lengthMenu=c(3,5)))
+})%>%
+  bindCache(input$name)
+```
+
+Regional Analysis: 
+=====================================     
+
+Inputs {.sidebar}
+-------------------------------------
+
+```{r}
+selectInput("region", label = "Which Region:",
+            choices = by_region_tables$region, selected = by_region_tables$region[1])
+
+selectInput("table", label = "Which Data:",
+            choices = sort(colnames(by_region_tables)[-1]), selected = sort(colnames(by_region_tables)[-1])[1])
+```
+
+```{r}
+renderUI({
+  HTML(datatable_cell(by_region_commentary, input$table, input$region))
+})
+```
+
+Column {.tabset}
+-----------------------------------------------------------------------
+
+### Plot:
+
+```{r}
+renderPlotly({
+  datatable_cell(by_region_plots, input$table, input$region)
+})%>%
+  bindCache(input$table, input$region)
+```
+
+### Table:
+  
+```{r}
+DT::renderDataTable(server=FALSE,{
+  datatable_cell(by_region_tables, input$table, input$region)%>%
+    datatable(extensions = "Buttons", 
+              options = list(rownames = FALSE, 
+                             columnDefs = list(list(className = 'dt-center', targets = "_all")),
+                             paging = TRUE,
+                             scrollX=TRUE,
+                             scrollY=TRUE,
+                             searching = TRUE,
+                             ordering = TRUE,
+                             dom = 'Btip',
+                             buttons = list(
+                                list(extend = 'csv', filename =  paste("MPI", input$region, input$table, sep = "-")),
+                                list(extend = 'excel', filename =  paste("MPI", input$region, input$table, sep = "-"))
+                             ),
+                             pageLength=10, 
+                             lengthMenu=c(3,5)))
+})%>%
+  bindCache(input$table, input$region)
+```
