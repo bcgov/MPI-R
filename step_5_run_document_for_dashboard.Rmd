@@ -1,6 +1,5 @@
 ---
 title: "British Columbia's Major Project Inventory"
-date: 'Last Update: `r format(Sys.time(), "%B %d, %Y")`'
 output:
   flexdashboard::flex_dashboard: null
   orientation: columns
