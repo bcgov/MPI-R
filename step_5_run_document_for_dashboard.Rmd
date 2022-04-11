@@ -1,10 +1,12 @@
 ---
 title: "British Columbia's Major Project Inventory"
+date: "`r paste0('last update: ',file.info(here::here('processed_data','mpi_shortraw.rds'))$mtime-lubridate::hours(7))`"
 output:
-  flexdashboard::flex_dashboard: null
-  orientation: columns
-css: style.css
-source_code: "https://github.com/bcgov/MPI-R"
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    social: menu
+    source_code: "https://github.com/bcgov/MPI-R"
+    css: style.css
 runtime: shiny
 resource_files:
 - processed_data/maps.rds
@@ -18,22 +20,15 @@ resource_files:
   
 ```{r global, include=FALSE}
 #libraries----------
-library(DT)
 library(tidyverse)
-library(here)
-library(scales)
-library(tsibble)
-library(plotly)
-library(lubridate)
-library(ggsflabel)
 #load objects----------
-by_region_tables <- readRDS(here("processed_data","by_region_tables.rds"))
-all_regions_tables <- readRDS(here("processed_data","all_regions_tables.rds"))
-by_region_plots <- readRDS(here("processed_data","by_region_plots.rds"))
-all_regions_plots <- readRDS(here("processed_data","all_regions_plots.rds"))
-all_regions_commentary <- readRDS(here("processed_data","all_regions_commentary.rds"))
-by_region_commentary <- readRDS(here("processed_data","by_region_commentary.rds"))
-maps <- readRDS(here("processed_data","maps.rds"))
+by_region_tables <- readRDS(here::here("processed_data","by_region_tables.rds"))
+all_regions_tables <- readRDS(here::here("processed_data","all_regions_tables.rds"))
+by_region_plots <- readRDS(here::here("processed_data","by_region_plots.rds"))
+all_regions_plots <- readRDS(here::here("processed_data","all_regions_plots.rds"))
+all_regions_commentary <- readRDS(here::here("processed_data","all_regions_commentary.rds"))
+by_region_commentary <- readRDS(here::here("processed_data","by_region_commentary.rds"))
+maps <- readRDS(here::here("processed_data","maps.rds"))
 #functions------------
 #Extractor function (retrieve cell) for all_regions_* dataframes---------- 
 extract_all_regions_cell <- function(df, name){
@@ -102,9 +97,9 @@ Provincial Analysis:
 selectInput("name", label = "Which Data:",
             choices = all_regions_tables$thing_name, selected = all_regions_tables$thing_name[1])
 
-renderUI({
-  HTML(extract_all_regions_cell(all_regions_commentary, input$name))
-})
+# renderUI({
+#   HTML(extract_all_regions_cell(all_regions_commentary, input$name))
+# })
 ```
 
 Column {.tabset}
@@ -113,7 +108,7 @@ Column {.tabset}
 ### Plot:
 
 ```{r}
-renderPlotly({
+plotly::renderPlotly({
   extract_all_regions_cell(all_regions_plots, input$name)
 })%>%
   bindCache(input$name)
@@ -124,7 +119,7 @@ renderPlotly({
 ```{r}
 DT::renderDataTable(server=FALSE,{
   extract_all_regions_cell(all_regions_tables, input$name)%>%
-    datatable(extensions = "Buttons", 
+    DT::datatable(extensions = "Buttons", 
               options = list(rownames = FALSE, 
                              columnDefs = list(list(className = 'dt-center', targets = "_all")),
                              paging = TRUE,
@@ -158,9 +153,9 @@ selectInput("table", label = "Which Data:",
 ```
 
 ```{r}
-renderUI({
-  HTML(datatable_cell(by_region_commentary, input$table, input$region))
-})
+# renderUI({
+#   HTML(datatable_cell(by_region_commentary, input$table, input$region))
+# })
 ```
 
 Column {.tabset}
@@ -169,7 +164,7 @@ Column {.tabset}
 ### Plot:
 
 ```{r}
-renderPlotly({
+plotly::renderPlotly({
   datatable_cell(by_region_plots, input$table, input$region)
 })%>%
   bindCache(input$table, input$region)
@@ -180,7 +175,7 @@ renderPlotly({
 ```{r}
 DT::renderDataTable(server=FALSE,{
   datatable_cell(by_region_tables, input$table, input$region)%>%
-    datatable(extensions = "Buttons", 
+    DT::datatable(extensions = "Buttons", 
               options = list(rownames = FALSE, 
                              columnDefs = list(list(className = 'dt-center', targets = "_all")),
                              paging = TRUE,
