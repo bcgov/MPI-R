@@ -18,6 +18,7 @@ keep_columns <- function(df){
                               "last_update", "last_up_dt"))
 }
 #the program----------------
+if (!file.exists(here::here("raw_data"))) dir.create(here::here("raw_data"))
 mpi_url_to_scrape <- "https://www2.gov.bc.ca/gov/content/employment-business/economic-development/industry/bc-major-projects-inventory/recent-reports"
 mpi_scraped <- rvest::read_html(mpi_url_to_scrape)
 mpi_links <- rvest::html_attr(rvest::html_nodes(mpi_scraped, "a"), "href") #all the links
