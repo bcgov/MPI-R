@@ -79,6 +79,7 @@ datatable_cell <- function(df, type, reg){
 -   This dashboard contains two Maps and Provincial and Regional analyses of Major Projects.
 -   You can navigate to these sections by clicking on the header bar.
 -   The data used in the Provincial and Regional analyses can be downloaded from the table tab.
+-   All data retrieved from [British Columbia's Major Project Inventory](https://www2.gov.bc.ca/gov/content/employment-business/economic-development/industry/bc-major-projects-inventory/recent-reports).
 
 ## Column
 
@@ -95,7 +96,7 @@ datatable_cell <- function(df, type, reg){
 -   This dashboard contains two Maps and Provincial and Regional analyses of Major Projects.
 -   You can navigate to these sections by clicking on the header bar.
 -   The data used in the Provincial and Regional analyses can be downloaded from the table tab.
-
+-   All data retrieved from [British Columbia's Major Project Inventory](https://www2.gov.bc.ca/gov/content/employment-business/economic-development/industry/bc-major-projects-inventory/recent-reports).
 
 ## Column
 
