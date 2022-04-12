@@ -1,4 +1,16 @@
-#This script makes a couple choropleths and saves them as an Rds object.
+# Copyright 2022 Province of British Columbia
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and limitations under the License.
+
+#This script takes data from the file mpi_shortraw.rds makes a couple choropleths and saves them as an Rds object.
 if(!"tidyverse" %in% names(sessionInfo()$otherPkgs)) library(tidyverse)
 #functions-----------
 create_map <- function(df, var, facet=TRUE){
