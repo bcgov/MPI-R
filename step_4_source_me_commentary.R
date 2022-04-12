@@ -10,7 +10,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and limitations under the License.
 
-
 #This script takes HTML formatted commentary and saves as an Rds binary file (not currently used by dashboard)
 #libraries-----
 if(!"tidyverse" %in% names(sessionInfo()$otherPkgs)) library(tidyverse)

@@ -1,6 +1,6 @@
 ---
 title: "British Columbia's Major Project Inventory"
-date: "`r paste0('last update: ',file.info(here::here('processed_data','mpi_shortraw.rds'))$mtime-lubridate::hours(7))`"
+date: "`r paste0('updated: ',as.Date(file.info(here::here('processed_data','mpi_shortraw.rds'))$mtime-lubridate::hours(7)))`"
 output:
   flexdashboard::flex_dashboard:
     orientation: columns
@@ -9,7 +9,6 @@ output:
     css: style.css
 runtime: shiny
 resource_files:
-- processed_data/maps.rds
 - processed_data/by_region_tables.rds
 - processed_data/by_region_plots.rds
 - processed_data/by_region_commentary.rds
@@ -17,7 +16,7 @@ resource_files:
 - processed_data/all_regions_plots.rds
 - processed_data/all_regions_commentary.rds
 ---
-  
+
 ```{r global, include=FALSE}
 # Copyright 2022 Province of British Columbia
 #
@@ -30,6 +29,7 @@ resource_files:
 # Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and limitations under the License.
+
 #libraries----------
 library(tidyverse)
 #load objects----------
@@ -39,7 +39,6 @@ by_region_plots <- readRDS(here::here("processed_data","by_region_plots.rds"))
 all_regions_plots <- readRDS(here::here("processed_data","all_regions_plots.rds"))
 all_regions_commentary <- readRDS(here::here("processed_data","all_regions_commentary.rds"))
 by_region_commentary <- readRDS(here::here("processed_data","by_region_commentary.rds"))
-maps <- readRDS(here::here("processed_data","maps.rds"))
 #functions------------
 #Extractor function (retrieve cell) for all_regions_* dataframes---------- 
 extract_all_regions_cell <- function(df, name){
@@ -71,41 +70,47 @@ datatable_cell <- function(df, type, reg){
 }
 ```
 
-Maps:
-=====================================  
- 
- Inputs {.sidebar}
--------------------------------------
+# Regional Map
+
+## Inputs {.sidebar}
+
+<br>
+
+-   This dashboard contains two Maps and Provincial and Regional analyses of Major Projects.
+-   You can navigate to these sections by clicking on the header bar.
+-   The data used in the Provincial and Regional analyses can be downloaded from the table tab.
+
+## Column
+
+### MPI by region in `r max(all_regions_tables[[2]][[2]]$quarter)`:
+
+![](processed_data/by_region_map.png)
+
+# By type and stage
+
+## Inputs {.sidebar}
+
+<br>
+
+-   This dashboard contains two Maps and Provincial and Regional analyses of Major Projects.
+-   You can navigate to these sections by clicking on the header bar.
+-   The data used in the Provincial and Regional analyses can be downloaded from the table tab.
+
+
+## Column
+
+### MPI by region type and stage in `r max(all_regions_tables[[2]][[2]]$quarter)`:
+
+![](processed_data/by_region_type_and_stage_map.png)
+
+# Provincial Analysis
+
+## Inputs {.sidebar}
+
+<br>
 
 ```{r}
-selectInput("map", label = "Which Map:",
-            choices = names(maps), selected = names(maps)[1])
-```
-
-* This dashboard contains Maps, Provincial and Regional analyses of Major Projects.
-* Specific visualizations can be picked from the input selector above.
-* The data for the Plots can downloaded from the Table tab. 
-
-Column 
------------------------------------------------------------------------
-  
-### MPI `r max(all_regions_tables[[2]][[2]]$quarter)`:
-  
-```{r}
-renderPlot({
-  maps[[input$map]]
-})%>%
-  bindCache(input$map)
-```
-
-Provincial Analysis:
-=====================================  
- 
- Inputs {.sidebar}
--------------------------------------
-
-```{r}
-selectInput("name", label = "Which Data:",
+selectInput("name", label = "Choose a slice of data:",
             choices = all_regions_tables$thing_name, selected = all_regions_tables$thing_name[1])
 
 # renderUI({
@@ -113,8 +118,7 @@ selectInput("name", label = "Which Data:",
 # })
 ```
 
-Column {.tabset}
------------------------------------------------------------------------
+## Column {.tabset}
 
 ### Plot:
 
@@ -126,7 +130,7 @@ plotly::renderPlotly({
 ```
 
 ### Table:
-  
+
 ```{r}
 DT::renderDataTable(server=FALSE,{
   extract_all_regions_cell(all_regions_tables, input$name)%>%
@@ -149,11 +153,11 @@ DT::renderDataTable(server=FALSE,{
   bindCache(input$name)
 ```
 
-Regional Analysis: 
-=====================================     
+# Regional Analysis
 
-Inputs {.sidebar}
--------------------------------------
+## Inputs {.sidebar}
+
+<br>
 
 ```{r}
 selectInput("region", label = "Which Region:",
@@ -169,8 +173,7 @@ selectInput("table", label = "Which Data:",
 # })
 ```
 
-Column {.tabset}
------------------------------------------------------------------------
+## Column {.tabset}
 
 ### Plot:
 
@@ -182,7 +185,7 @@ plotly::renderPlotly({
 ```
 
 ### Table:
-  
+
 ```{r}
 DT::renderDataTable(server=FALSE,{
   datatable_cell(by_region_tables, input$table, input$region)%>%

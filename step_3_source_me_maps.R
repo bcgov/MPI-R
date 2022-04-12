@@ -59,8 +59,23 @@ disaggregated <- left_join(last_quarter_disaggregated, bc_map, by="region")%>%
 aggregated <- left_join(last_quarter_aggregated, bc_map, by="region")%>%
   sf::st_as_sf()
 
-maps <- list()
-maps$`By Region` <- create_map(aggregated, `Total Project Cost (M)`, facet=FALSE)+
+by_region_map <- create_map(aggregated, `Total Project Cost (M)`, facet=FALSE)+
   ggsflabel::geom_sf_label_repel(aes(label = str_to_title(str_replace_all(region,"_"," "))))
-maps$`By Region, Type and Stage`<- create_map(disaggregated, `Total Project Cost (M)`)
-saveRDS(maps, here::here("processed_data","maps.rds"))
+by_region_type_and_stage_map <- create_map(disaggregated, `Total Project Cost (M)`)
+
+ggsave(here::here("processed_data", "by_region_map.png"),
+       by_region_map,
+       width=12,
+       height=8,
+       units="in",
+       dpi="retina")
+ggsave(here::here("processed_data", "by_region_type_and_stage_map.png"),
+       by_region_type_and_stage_map,
+       width=12,
+       height=8,
+       units="in",
+       dpi="retina")
+
+
+
+
