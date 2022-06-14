@@ -60,7 +60,7 @@ aggregated <- left_join(last_quarter_aggregated, bc_map, by="region")%>%
   sf::st_as_sf()
 
 by_region_map <- create_map(aggregated, `Total Project Cost (M)`, facet=FALSE)+
-  ggsflabel::geom_sf_label_repel(aes(label = str_to_title(str_replace_all(region,"_"," "))))
+  ggsflabel::geom_sf_label_repel(aes(label = paste(str_to_title(str_replace_all(region,"_"," ")), scales::dollar(`Total Project Cost (M)`, suffix=" (M)"), sep="\n")))
 by_region_type_and_stage_map <- create_map(disaggregated, `Total Project Cost (M)`)
 
 ggsave(here::here("processed_data", "by_region_map.png"),

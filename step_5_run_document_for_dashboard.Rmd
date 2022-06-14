@@ -1,9 +1,9 @@
 ---
-title: "British Columbia's Major Project Inventory"
+title: "B.C. Major Project Inventory"
 date: "`r paste0('updated: ',as.Date(file.info(here::here('processed_data','mpi_shortraw.rds'))$mtime-lubridate::hours(7)))`"
 output:
   flexdashboard::flex_dashboard:
-    orientation: columns
+    orientation: rows
     social: menu
     source_code: "https://github.com/bcgov/MPI-R"
     css: style.css
@@ -33,6 +33,14 @@ resource_files:
 #libraries----------
 library(tidyverse)
 #load objects----------
+short <- readRDS(here::here("processed_data", "mpi_shortraw.rds"))%>%
+  janitor::clean_names()%>%
+  mutate(last_update=as.Date(last_update),
+        project_status=fct_relevel(project_status, "Proposed", "On hold", "Construction started", "Completed"),
+        project_status=factor(project_status, ordered = TRUE),
+        project_stage=fct_relevel(project_stage, "Preliminary/Feasibility", "Consultation/Approvals","Tender/Preconstruction","Permitting"),
+        project_stage=factor(project_stage, ordered = TRUE)
+        )
 by_region_tables <- readRDS(here::here("processed_data","by_region_tables.rds"))
 all_regions_tables <- readRDS(here::here("processed_data","all_regions_tables.rds"))
 by_region_plots <- readRDS(here::here("processed_data","by_region_plots.rds"))
@@ -208,3 +216,130 @@ DT::renderDataTable(server=FALSE,{
 })%>%
   bindCache(input$table, input$region)
 ```
+
+# Find a project
+
+## Inputs {.sidebar}
+
+<br>
+
+```{r}
+
+selectInput("project_name", label = "Which Project?",
+            choices = sort(unique(short$project_name)), selected = sort(unique(short$project_name))[1])
+
+
+reactive_df <- reactive({
+  short%>%
+    filter(project_name==input$project_name
+          )
+})
+```
+
+Row {data-height=350}
+-------------------------------------
+    
+### Description
+ 
+```{r}
+shiny::renderUI({
+  reactive_df()%>%
+    pull(project_description)%>%
+    last()
+})
+```   
+
+Row {data-height=150}
+-------------------------------------
+    
+### Estimated Cost:
+
+```{r}
+shiny::renderUI({
+  reactive_df()%>%
+    pull(estimated_cost)%>%
+    last()%>%
+    scales::dollar(suffix = " (M)")
+})
+```
+    
+### Construction Type:
+
+```{r}
+shiny::renderUI({
+  reactive_df()%>%
+    pull(construction_type)%>%
+    last()
+})
+```
+
+### Construction Subtype:
+
+```{r}
+shiny::renderUI({
+  reactive_df()%>%
+    pull(construction_subtype)%>%
+    last()
+})
+```
+
+### Project Type:
+
+```{r}
+shiny::renderUI({
+  reactive_df()%>%
+    pull(project_type)%>%
+    last()
+})
+```
+
+### Project Category:
+
+```{r}
+shiny::renderUI({
+  reactive_df()%>%
+    pull(project_category_name)%>%
+    last()
+})
+```
+
+### Telephone:
+
+```{r}
+shiny::renderUI({
+  reactive_df()%>%
+    pull(telephone)%>%
+    last()
+})
+```
+
+Row {data-height=600}
+-------------------------------------
+    
+### Project Status:
+
+```{r}
+renderPlot({
+  reactive_df()%>%
+    ggplot(aes(last_update, project_status))+
+  geom_point()+
+  scale_x_date(date_labels = "%Y %b %d",name = NULL)+
+  scale_y_discrete(name=NULL, drop=FALSE)  
+})
+```
+
+
+### Project Stage:
+
+```{r}
+renderPlot({
+  reactive_df()%>%
+    ggplot(aes(last_update, project_stage))+
+  geom_point()+
+  scale_x_date(date_labels = "%Y %b %d",name = NULL)+
+  scale_y_discrete(name=NULL, drop=FALSE)  
+})
+```
+
+
+

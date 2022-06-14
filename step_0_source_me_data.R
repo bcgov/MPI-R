@@ -20,11 +20,14 @@ keep_columns <- function(df){
   df%>%
     select_if(names(.) %in% c("project_id", "proj_id",
                               "project_name", "proj_nm",
+                              "telephone","fin_by",
+                              "project_description", "description",
                               "estimated_cost", "est_cost",
                               "construction_type", "proj_cons_typ",
                               "construction_subtype", "proj_con_subtyp",
                               "project_type", "proj_typ",
                               "region",
+                              "municipality", "muni_nm",
                               "project_status", "status",
                               "project_stage", "stage",
                               "project_category_name", "proj_cat",
@@ -52,7 +55,8 @@ short_files <-mpi_files[1:length(short_sheets)]
 short_nested <- tibble(file = here::here("raw_data", short_files), sheet = short_sheets)%>%
    mutate(data = map2(file, sheet, readxl::read_excel),
           data = map(data, janitor::clean_names),
-          data = map(data, keep_columns))
+          data = map(data, keep_columns)
+          )
 mpi_shortraw <- data.table::rbindlist(short_nested$data, use.names = FALSE)%>%
   as_tibble()%>%
    mutate(source = mpi_url_to_scrape,
