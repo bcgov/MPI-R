@@ -20,18 +20,27 @@ keep_columns <- function(df){
   df%>%
     select_if(names(.) %in% c("project_id", "proj_id",
                               "project_name", "proj_nm",
-                              "telephone","fin_by",
                               "project_description", "description",
                               "estimated_cost", "est_cost",
-                              "construction_type", "proj_cons_typ",
-                              "construction_subtype", "proj_con_subtyp",
                               "project_type", "proj_typ",
                               "region",
                               "municipality", "muni_nm",
+                              "developer", "dvlpr_nm",
                               "project_status", "status",
                               "project_stage", "stage",
                               "project_category_name", "proj_cat",
+                              "construction_type", "proj_cons_typ",
+                              "construction_subtype", "proj_con_subtyp",
+                              "public_funding_ind","public",
+                         #     "provinvial_funding","province",
+                          #    "federal_funding","federal",
+                          #    "municipal_funding","municipal",
+                          #    "other_public_funding","other_province",
+                              "green_building_ind","green_building",
+                              "clean_energy_ind","clean_energy",
+                              "first_nation_ind", "indigenous_ind","fn",
                               "first_entry_date", "entry_dt",
+                              "telephone","fin_by",
                               "last_update", "last_up_dt"))
 }
 #the program----------------
@@ -65,5 +74,16 @@ mpi_shortraw <- data.table::rbindlist(short_nested$data, use.names = FALSE)%>%
                                               `Residential & Commercial`= c("Residential/Commercial",
                                                                             "Residential Commercial")))%>%
   mutate(days_in_inventory = as.numeric(difftime(last_update, first_entry_date, units = "days")),
-         quarter = tsibble::yearquarter(published_dates))
+         quarter = tsibble::yearquarter(published_dates))%>%
+  mutate(last_update=as.Date(last_update),
+         project_status=fct_relevel(project_status, "Proposed", "On hold", "Construction started", "Completed"),
+         project_status=factor(project_status, ordered = TRUE),
+         project_stage=fct_relevel(project_stage, "Preliminary/Feasibility", "Consultation/Approvals","Tender/Preconstruction","Permitting"),
+         project_stage=factor(project_stage, ordered = TRUE),
+         public_funding_ind=factor(public_funding_ind, labels = c("no", "yes")),
+         green_building_ind=factor(green_building_ind, labels = c("no", "yes")),
+         clean_energy_ind=factor(clean_energy_ind, labels = c("no", "yes")),
+         indigenous_ind=factor(indigenous_ind, labels = c("no", "yes"))
+  )
+
 saveRDS(mpi_shortraw, here::here("processed_data", "mpi_shortraw.rds"))

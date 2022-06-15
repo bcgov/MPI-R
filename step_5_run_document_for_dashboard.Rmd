@@ -5,7 +5,7 @@ output:
   flexdashboard::flex_dashboard:
     orientation: rows
     social: menu
-    source_code: "https://github.com/bcgov/MPI-R"
+    source_code: https://github.com/bcgov/MPI-R
     css: style.css
 runtime: shiny
 resource_files:
@@ -15,6 +15,7 @@ resource_files:
 - processed_data/all_regions_tables.rds
 - processed_data/all_regions_plots.rds
 - processed_data/all_regions_commentary.rds
+- processed_data/mpi_shortraw.rds
 ---
 
 ```{r global, include=FALSE}
@@ -32,15 +33,9 @@ resource_files:
 
 #libraries----------
 library(tidyverse)
+library(shinyWidgets)
 #load objects----------
-short <- readRDS(here::here("processed_data", "mpi_shortraw.rds"))%>%
-  janitor::clean_names()%>%
-  mutate(last_update=as.Date(last_update),
-        project_status=fct_relevel(project_status, "Proposed", "On hold", "Construction started", "Completed"),
-        project_status=factor(project_status, ordered = TRUE),
-        project_stage=fct_relevel(project_stage, "Preliminary/Feasibility", "Consultation/Approvals","Tender/Preconstruction","Permitting"),
-        project_stage=factor(project_stage, ordered = TRUE)
-        )
+short <- readRDS(here::here("processed_data", "mpi_shortraw.rds"))
 by_region_tables <- readRDS(here::here("processed_data","by_region_tables.rds"))
 all_regions_tables <- readRDS(here::here("processed_data","all_regions_tables.rds"))
 by_region_plots <- readRDS(here::here("processed_data","by_region_plots.rds"))
@@ -221,31 +216,49 @@ DT::renderDataTable(server=FALSE,{
 
 ## Inputs {.sidebar}
 
-<br>
+To find a project you can either
+
+*  filter by variable or
+*  type part of the project name in the Select Project box then choose.
 
 ```{r}
+selectizeGroupUI(
+        id = "my-filters",
+        inline = FALSE,
+        params = list(
+          var_one = list(inputId = "region", title = "Select Region", placeholder = 'select'),
+          var_two = list(inputId = "municipality", title = "Select Municipality", placeholder = 'select'),
+          var_three = list(inputId = "project_type", title = "Select Project Type", placeholder = 'select'),
+          var_four = list(inputId = "project_category_name", title = "Select Project Category", placeholder = 'select'),
+          var_five = list(inputId = "public_funding_ind", title = "Select Public Funding", placeholder = 'select'),
+          var_six = list(inputId = "project_name", title = "Select Project", placeholder = 'select')
+        )
+      )
 
-selectInput("project_name", label = "Which Project?",
-            choices = sort(unique(short$project_name)), selected = sort(unique(short$project_name))[1])
-
-
-reactive_df <- reactive({
-  short%>%
-    filter(project_name==input$project_name
-          )
-})
+res_mod <- callModule(
+      module = selectizeGroupServer,
+      id = "my-filters",
+      data = short,
+      vars = c("region", "municipality", "project_type","project_category_name", "public_funding_ind","project_name")
+    )
 ```
 
-Row {data-height=350}
+Row {data-height=300}
 -------------------------------------
     
 ### Description
  
 ```{r}
 shiny::renderUI({
-  reactive_df()%>%
+  if(length(unique(res_mod()$project_name))==1){
+  description <- res_mod()%>%
     pull(project_description)%>%
     last()
+  name <- res_mod()%>%
+    pull(project_name)%>%
+    last()
+  HTML(paste0("<b>",name,":</b> ", description))
+  }
 })
 ```   
 
@@ -256,10 +269,12 @@ Row {data-height=150}
 
 ```{r}
 shiny::renderUI({
-  reactive_df()%>%
+  if(length(unique(res_mod()$project_name))==1){
+  res_mod()%>%
     pull(estimated_cost)%>%
     last()%>%
     scales::dollar(suffix = " (M)")
+  }
 })
 ```
     
@@ -267,9 +282,11 @@ shiny::renderUI({
 
 ```{r}
 shiny::renderUI({
-  reactive_df()%>%
+  if(length(unique(res_mod()$project_name))==1){
+  res_mod()%>%
     pull(construction_type)%>%
     last()
+  }
 })
 ```
 
@@ -277,9 +294,11 @@ shiny::renderUI({
 
 ```{r}
 shiny::renderUI({
-  reactive_df()%>%
+  if(length(unique(res_mod()$project_name))==1){
+  res_mod()%>%
     pull(construction_subtype)%>%
     last()
+  }
 })
 ```
 
@@ -287,9 +306,11 @@ shiny::renderUI({
 
 ```{r}
 shiny::renderUI({
-  reactive_df()%>%
+  if(length(unique(res_mod()$project_name))==1){
+  res_mod()%>%
     pull(project_type)%>%
     last()
+  }
 })
 ```
 
@@ -297,9 +318,11 @@ shiny::renderUI({
 
 ```{r}
 shiny::renderUI({
-  reactive_df()%>%
+  if(length(unique(res_mod()$project_name))==1){
+  res_mod()%>%
     pull(project_category_name)%>%
     last()
+  }
 })
 ```
 
@@ -307,24 +330,131 @@ shiny::renderUI({
 
 ```{r}
 shiny::renderUI({
-  reactive_df()%>%
+  if(length(unique(res_mod()$project_name))==1){
+  res_mod()%>%
     pull(telephone)%>%
     last()
+  }
 })
 ```
 
-Row {data-height=600}
+### Region:
+
+```{r}
+shiny::renderUI({
+  if(length(unique(res_mod()$project_name))==1){
+  res_mod()%>%
+    pull(region)%>%
+    last()
+  }
+})
+```
+
+
+Row {data-height=150}
+-------------------------------------
+  
+### Municipality:
+
+```{r}
+shiny::renderUI({
+  if(length(unique(res_mod()$project_name))==1){
+  res_mod()%>%
+    pull(municipality)%>%
+    last()
+  }
+})
+```  
+  
+  
+    
+### Project ID:
+
+```{r}
+shiny::renderUI({
+  if(length(unique(res_mod()$project_name))==1){
+  res_mod()%>%
+    pull(project_id)%>%
+    last()
+  }
+})
+```
+
+### Developer:
+
+```{r}
+shiny::renderUI({
+  if(length(unique(res_mod()$project_name))==1){
+  res_mod()%>%
+    pull(developer)%>%
+    last()
+  }
+})
+```
+
+### Public Funding:
+
+```{r}
+shiny::renderUI({
+  if(length(unique(res_mod()$project_name))==1){
+  res_mod()%>%
+    pull(public_funding_ind)%>%
+    last()
+  }
+})
+```
+
+### Green Building:
+
+```{r}
+shiny::renderUI({
+  if(length(unique(res_mod()$project_name))==1){
+  res_mod()%>%
+    pull(green_building_ind)%>%
+    last()
+  }
+})
+```
+
+### Clean Energy:
+
+```{r}
+shiny::renderUI({
+  if(length(unique(res_mod()$project_name))==1){
+  res_mod()%>%
+    pull(clean_energy_ind)%>%
+    last()
+  }
+})
+```
+
+### Indigenous:
+
+```{r}
+shiny::renderUI({
+  if(length(unique(res_mod()$project_name))==1){
+  res_mod()%>%
+    pull(indigenous_ind)%>%
+    last()
+  }
+})
+```
+
+
+Row
 -------------------------------------
     
 ### Project Status:
 
 ```{r}
 renderPlot({
-  reactive_df()%>%
+  if(length(unique(res_mod()$project_name))==1){
+  res_mod()%>%
     ggplot(aes(last_update, project_status))+
   geom_point()+
   scale_x_date(date_labels = "%Y %b %d",name = NULL)+
   scale_y_discrete(name=NULL, drop=FALSE)  
+  }
 })
 ```
 
@@ -333,11 +463,13 @@ renderPlot({
 
 ```{r}
 renderPlot({
-  reactive_df()%>%
+  if(length(unique(res_mod()$project_name))==1){
+  res_mod()%>%
     ggplot(aes(last_update, project_stage))+
   geom_point()+
   scale_x_date(date_labels = "%Y %b %d",name = NULL)+
-  scale_y_discrete(name=NULL, drop=FALSE)  
+  scale_y_discrete(name=NULL, drop=FALSE) 
+  }
 })
 ```
 
