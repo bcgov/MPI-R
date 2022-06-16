@@ -216,22 +216,22 @@ DT::renderDataTable(server=FALSE,{
 
 ## Inputs {.sidebar}
 
-To find a project you can either
+<br>
 
-*  filter by variable or
-*  type part of the project name in the Select Project box then choose.
+*  You can either drill down OR find a project by name.
+*  Once a *single* project is displayed to the right, details available on next page.
 
 ```{r}
 selectizeGroupUI(
         id = "my-filters",
         inline = FALSE,
         params = list(
-          var_one = list(inputId = "region", title = "Select Region", placeholder = 'select'),
-          var_two = list(inputId = "municipality", title = "Select Municipality", placeholder = 'select'),
-          var_three = list(inputId = "project_type", title = "Select Project Type", placeholder = 'select'),
-          var_four = list(inputId = "project_category_name", title = "Select Project Category", placeholder = 'select'),
-          var_five = list(inputId = "public_funding_ind", title = "Select Public Funding", placeholder = 'select'),
-          var_six = list(inputId = "project_name", title = "Select Project", placeholder = 'select')
+          var_one = list(inputId = "region", title = "Filter Region", placeholder = 'select'),
+          var_two = list(inputId = "municipality", title = "Filter Municipality", placeholder = 'select'),
+          var_three = list(inputId = "project_type", title = "Filter Project Type", placeholder = 'select'),
+          var_four = list(inputId = "project_category_name", title = "Filter Project Category", placeholder = 'select'),
+          var_five = list(inputId = "public_funding_ind", title = "Filter Public Funding", placeholder = 'select'),
+          var_six = list(inputId = "project_name", title = "Filter Project Name", placeholder = 'select')
         )
       )
 
@@ -241,7 +241,41 @@ res_mod <- callModule(
       data = short,
       vars = c("region", "municipality", "project_type","project_category_name", "public_funding_ind","project_name")
     )
+render <- function(var){
+  shiny::renderUI({
+    if(length(unique(res_mod()$project_name))==1){
+    res_mod()%>%
+      pull({{  var  }})%>%
+      last()
+    }
+  })
+} 
 ```
+
+## Column
+
+```{r}
+renderTable({
+  df <- res_mod()%>%
+    distinct(project_id, project_name, region, municipality, project_type, project_category_name, public_funding_ind)%>%
+    select(project_name, region, municipality, project_type, project_category_name, public_funding_ind, project_id)%>%
+    arrange(project_name)
+  df <- df%>%
+    mutate(project_id=as.character(project_id))
+  colnames(df) <- stringr::str_to_title(stringr::str_replace_all(colnames(df),"_"," "))
+  df
+  }) 
+```
+
+
+# Project Details
+
+## Inputs {.sidebar}
+
+<br>
+
+*  Choose a *single* project on the Find a project page.
+
 
 Row {data-height=300}
 -------------------------------------
@@ -281,73 +315,37 @@ shiny::renderUI({
 ### Construction Type:
 
 ```{r}
-shiny::renderUI({
-  if(length(unique(res_mod()$project_name))==1){
-  res_mod()%>%
-    pull(construction_type)%>%
-    last()
-  }
-})
+render(construction_type)
 ```
 
 ### Construction Subtype:
 
 ```{r}
-shiny::renderUI({
-  if(length(unique(res_mod()$project_name))==1){
-  res_mod()%>%
-    pull(construction_subtype)%>%
-    last()
-  }
-})
+render(construction_subtype)
 ```
 
 ### Project Type:
 
 ```{r}
-shiny::renderUI({
-  if(length(unique(res_mod()$project_name))==1){
-  res_mod()%>%
-    pull(project_type)%>%
-    last()
-  }
-})
+render(project_type)
 ```
 
 ### Project Category:
 
 ```{r}
-shiny::renderUI({
-  if(length(unique(res_mod()$project_name))==1){
-  res_mod()%>%
-    pull(project_category_name)%>%
-    last()
-  }
-})
+render(project_category_name)
 ```
 
 ### Telephone:
 
 ```{r}
-shiny::renderUI({
-  if(length(unique(res_mod()$project_name))==1){
-  res_mod()%>%
-    pull(telephone)%>%
-    last()
-  }
-})
+render(telephone)
 ```
 
 ### Region:
 
 ```{r}
-shiny::renderUI({
-  if(length(unique(res_mod()$project_name))==1){
-  res_mod()%>%
-    pull(region)%>%
-    last()
-  }
-})
+render(region)
 ```
 
 
@@ -357,87 +355,43 @@ Row {data-height=150}
 ### Municipality:
 
 ```{r}
-shiny::renderUI({
-  if(length(unique(res_mod()$project_name))==1){
-  res_mod()%>%
-    pull(municipality)%>%
-    last()
-  }
-})
+render(municipality)
 ```  
-  
-  
-    
+
 ### Project ID:
 
 ```{r}
-shiny::renderUI({
-  if(length(unique(res_mod()$project_name))==1){
-  res_mod()%>%
-    pull(project_id)%>%
-    last()
-  }
-})
+render(project_id)
 ```
 
 ### Developer:
 
 ```{r}
-shiny::renderUI({
-  if(length(unique(res_mod()$project_name))==1){
-  res_mod()%>%
-    pull(developer)%>%
-    last()
-  }
-})
+render(developer)
 ```
 
 ### Public Funding:
 
 ```{r}
-shiny::renderUI({
-  if(length(unique(res_mod()$project_name))==1){
-  res_mod()%>%
-    pull(public_funding_ind)%>%
-    last()
-  }
-})
+render(public_funding_ind)
 ```
 
 ### Green Building:
 
 ```{r}
-shiny::renderUI({
-  if(length(unique(res_mod()$project_name))==1){
-  res_mod()%>%
-    pull(green_building_ind)%>%
-    last()
-  }
-})
+render(green_building_ind)
 ```
 
 ### Clean Energy:
 
 ```{r}
-shiny::renderUI({
-  if(length(unique(res_mod()$project_name))==1){
-  res_mod()%>%
-    pull(clean_energy_ind)%>%
-    last()
-  }
-})
+render(clean_energy_ind)
 ```
 
 ### Indigenous:
 
 ```{r}
-shiny::renderUI({
-  if(length(unique(res_mod()$project_name))==1){
-  res_mod()%>%
-    pull(indigenous_ind)%>%
-    last()
-  }
-})
+render(indigenous_ind)
 ```
 
 
