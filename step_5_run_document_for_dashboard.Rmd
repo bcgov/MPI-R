@@ -257,11 +257,13 @@ render <- function(var){
 ```{r}
 renderTable({
   df <- res_mod()%>%
-    distinct(project_id, project_name, region, municipality, project_type, project_category_name, public_funding_ind)%>%
-    select(project_name, region, municipality, project_type, project_category_name, public_funding_ind, project_id)%>%
-    arrange(project_name)
+    distinct(project_id, project_name, estimated_cost, region, municipality, project_type, project_category_name, public_funding_ind)%>%
+    select(project_name, estimated_cost, region, municipality, project_type, project_category_name, public_funding_ind, project_id)%>%
+    arrange(desc(estimated_cost))
   df <- df%>%
-    mutate(project_id=as.character(project_id))
+    mutate(project_id=as.character(project_id),
+           estimated_cost=scales::dollar(estimated_cost, accuracy = 1, suffix = "(M)")
+           )
   colnames(df) <- stringr::str_to_title(stringr::str_replace_all(colnames(df),"_"," "))
   df
   }) 
