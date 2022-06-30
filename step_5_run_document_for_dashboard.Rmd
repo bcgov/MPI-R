@@ -241,6 +241,7 @@ res_mod <- callModule(
       data = short,
       vars = c("region", "municipality", "project_type","project_category_name", "public_funding_ind","project_name")
     )
+# function render() needs to be defined after res_mod() otherwise R thinks res_mod() is a (missing) function not a Module.---------
 render <- function(var){
   shiny::renderUI({
     if(length(unique(res_mod()$project_name))==1){
