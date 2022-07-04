@@ -14,7 +14,6 @@ resource_files:
 - processed_data/by_region_commentary.rds
 - processed_data/all_regions_tables.rds
 - processed_data/all_regions_plots.rds
-- processed_data/all_regions_commentary.rds
 - processed_data/mpi_shortraw.rds
 ---
 
@@ -40,8 +39,6 @@ by_region_tables <- readRDS(here::here("processed_data","by_region_tables.rds"))
 all_regions_tables <- readRDS(here::here("processed_data","all_regions_tables.rds"))
 by_region_plots <- readRDS(here::here("processed_data","by_region_plots.rds"))
 all_regions_plots <- readRDS(here::here("processed_data","all_regions_plots.rds"))
-all_regions_commentary <- readRDS(here::here("processed_data","all_regions_commentary.rds"))
-by_region_commentary <- readRDS(here::here("processed_data","by_region_commentary.rds"))
 #functions------------
 #Extractor function (retrieve cell) for all_regions_* dataframes---------- 
 extract_all_regions_cell <- function(df, name){
@@ -116,10 +113,6 @@ datatable_cell <- function(df, type, reg){
 ```{r}
 selectInput("name", label = "Choose a slice of data:",
             choices = all_regions_tables$thing_name, selected = all_regions_tables$thing_name[1])
-
-# renderUI({
-#   HTML(extract_all_regions_cell(all_regions_commentary, input$name))
-# })
 ```
 
 ## Column {.tabset}
@@ -169,12 +162,6 @@ selectInput("region", label = "Which Region:",
 
 selectInput("table", label = "Which Data:",
             choices = sort(colnames(by_region_tables)[-1]), selected = sort(colnames(by_region_tables)[-1])[1])
-```
-
-```{r}
-# renderUI({
-#   HTML(datatable_cell(by_region_commentary, input$table, input$region))
-# })
 ```
 
 ## Column {.tabset}
