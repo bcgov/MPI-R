@@ -39,6 +39,7 @@ by_region_tables <- readRDS(here::here("processed_data","by_region_tables.rds"))
 all_regions_tables <- readRDS(here::here("processed_data","all_regions_tables.rds"))
 by_region_plots <- readRDS(here::here("processed_data","by_region_plots.rds"))
 all_regions_plots <- readRDS(here::here("processed_data","all_regions_plots.rds"))
+
 #functions------------
 #Extractor function (retrieve cell) for all_regions_* dataframes---------- 
 extract_all_regions_cell <- function(df, name){

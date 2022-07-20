@@ -70,6 +70,3 @@ ggsave(here::here("processed_data", "by_region_type_and_stage_map.png"),
        units="in",
        dpi="retina")
 
-
-
-
