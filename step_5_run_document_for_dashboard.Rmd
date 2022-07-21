@@ -202,24 +202,26 @@ DT::renderDataTable(server=FALSE,{
 
 # Find a project
 
-## Inputs {.sidebar}
+## {data-height=100}
 
 <br>
 
 *  You can either drill down OR find a project by name.
-*  Once a *single* project is displayed to the right, details available on next page.
+*  Once a *single* project is displayed below, details available on next page.
+
+## {data-height=100}
 
 ```{r}
 selectizeGroupUI(
         id = "my-filters",
-        inline = FALSE,
+        inline = TRUE,
         params = list(
-          var_one = list(inputId = "region", title = "Filter Region", placeholder = 'select'),
-          var_two = list(inputId = "municipality", title = "Filter Municipality", placeholder = 'select'),
-          var_three = list(inputId = "project_type", title = "Filter Project Type", placeholder = 'select'),
-          var_four = list(inputId = "project_category_name", title = "Filter Project Category", placeholder = 'select'),
-          var_five = list(inputId = "public_funding_ind", title = "Filter Public Funding", placeholder = 'select'),
-          var_six = list(inputId = "project_name", title = "Filter Project Name", placeholder = 'select')
+          var_one = list(inputId = "region", title = "Region", placeholder = 'select'),
+          var_two = list(inputId = "municipality", title = "Municipality", placeholder = 'select'),
+          var_three = list(inputId = "project_type", title = "Project Type", placeholder = 'select'),
+          var_four = list(inputId = "project_category_name", title = "Project Category", placeholder = 'select'),
+          var_five = list(inputId = "public_funding_ind", title = "Public Funding", placeholder = 'select'),
+          var_six = list(inputId = "project_name", title = "Project Name", placeholder = 'select')
         )
       )
 
@@ -241,13 +243,13 @@ render <- function(var){
 } 
 ```
 
-## Column
+## {data-height=800}
 
 ```{r}
 renderTable({
   df <- res_mod()%>%
     distinct(project_id, project_name, estimated_cost, region, municipality, project_type, project_category_name, public_funding_ind)%>%
-    select(project_name, estimated_cost, region, municipality, project_type, project_category_name, public_funding_ind, project_id)%>%
+    select(region, municipality, project_type, project_category_name, public_funding_ind, project_name, estimated_cost, project_id)%>%
     arrange(desc(estimated_cost))
   df <- df%>%
     mutate(project_id=as.character(project_id),
