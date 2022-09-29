@@ -128,9 +128,9 @@ subtype_and_status <- function(df){
 input02.1b <- function(df){
   df%>%
   #  filter(quarter >= ten_years_earlier)%>%
-    group_by(project_category_name, quarter)%>%
+    group_by(project_category, quarter)%>%
     summarize(total = sum(estimated_cost, na.rm=TRUE))%>%
-    pivot_wider(names_from = project_category_name, values_from = total)%>%
+    pivot_wider(names_from = project_category, values_from = total)%>%
      janitor::clean_names()%>%
      mutate(quarter=as.character(quarter))
 }

@@ -25,7 +25,7 @@ quarter_ago <- tsibble::yearquarter(yq(max(short$quarter))-months(3))
 all_regions_plots <- tibble(name = "all_regions", data = list(short))%>%
   mutate(`2.1b by Category` = map(data, plot02.1b),
          `2.7  by Status` = map(data, plot_agg_val_by_status),
-         `2.1 Last Year by Category` = map(data, lfq_plot, project_category_name),
+         `2.1 Last Year by Category` = map(data, lfq_plot, project_category),
          `2.2 Last Quarter by Subtype and Status` = map(data, subtype_and_status_plot),
          `2.3 Last Quarter by Subtype and Region` = map(data, plot02.3),
          `2.4 Last Year by Status` = map(data, lfq_plot, project_status),

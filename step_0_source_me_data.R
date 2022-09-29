@@ -84,6 +84,30 @@ mpi_shortraw <- data.table::rbindlist(short_nested$data, use.names = FALSE)%>%
          green_building_ind=factor(green_building_ind, labels = c("no", "yes")),
          clean_energy_ind=factor(clean_energy_ind, labels = c("no", "yes")),
          indigenous_ind=factor(indigenous_ind, labels = c("no", "yes"))
+  )%>%
+  rename(public_funding = public_funding_ind,
+         green_building = green_building_ind,
+         clean_energy = clean_energy_ind,
+         indigenous = indigenous_ind,
+         project_category = project_category_name)%>%
+  mutate(municipality = word(municipality, 1, sep=","),
+         municipality = word(municipality, 1, sep="/"),
+         municipality = word(municipality, 1, sep="-"),
+         municipality = word(municipality, 1, sep="And"),
+         municipality = word(municipality, 1, sep="To"),
+         municipality = word(municipality, 1, sep="Area"),
+         municipality = word(municipality, 1, sep="area"),
+         municipality = word(municipality, 1, sep="region"),
+         municipality = word(municipality, 1, sep="south of"),
+         municipality = word(municipality, 1, sep=","),
+         municipality = trimws(municipality),
+         municipality = str_replace_all(municipality, "Tri","Coquitlam")
   )
 
-saveRDS(mpi_shortraw, here::here("processed_data", "mpi_shortraw.rds"))
+lat_lon <- read_csv(here::here("processed_data", "mpi_locations.csv"))%>%
+  mutate(municipality = word(place, 1, sep=","))%>% #gets rid of province and country.
+  select(-place)
+
+short <- left_join(mpi_shortraw, lat_lon, by="municipality", multiple = "all")
+
+saveRDS(short, here::here("processed_data", "mpi_shortraw.rds"))

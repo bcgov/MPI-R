@@ -5,7 +5,7 @@ output:
   flexdashboard::flex_dashboard:
     orientation: rows
     social: menu
-    source_code: https://github.com/bcgov/MPI-R
+    source_code: "https://github.com/bcgov/MPI-R"
     css: style.css
 runtime: shiny
 resource_files:
@@ -15,6 +15,8 @@ resource_files:
 - processed_data/all_regions_tables.rds
 - processed_data/all_regions_plots.rds
 - processed_data/mpi_shortraw.rds
+- .secrets/9566fe0643cfe888fecd0b72f870afec_rich.p.martin@gmail.com
+- .Rprofile
 ---
 
 ```{r global, include=FALSE}
@@ -33,6 +35,7 @@ resource_files:
 #libraries----------
 library(tidyverse)
 library(shinyWidgets)
+library(googlesheets4)
 #load objects----------
 short <- readRDS(here::here("processed_data", "mpi_shortraw.rds"))
 by_region_tables <- readRDS(here::here("processed_data","by_region_tables.rds"))
@@ -81,6 +84,34 @@ datatable_cell <- function(df, type, reg){
 -   You can navigate to these sections by clicking on the header bar.
 -   The data used in the Provincial and Regional analyses can be downloaded from the table tab.
 -   All data retrieved from [British Columbia's Major Project Inventory](https://www2.gov.bc.ca/gov/content/employment-business/economic-development/industry/bc-major-projects-inventory/recent-reports).
+<br>
+
+### User survey:
+
+```{r}
+
+textInput(
+  "who",
+  "Tell us a bit about yourself: e.g. who do you work for?")
+
+textInput(
+  "what",
+  "What do you use the MPI for?")
+textInput(
+  "features", 
+  "What additional features would you like to see?")
+ actionButton("submit", "Submit")
+
+textB <- reactive({
+  as.data.frame(c(input$who, input$what, input$features))
+})
+  
+observeEvent(input$submit, {
+    Selfie <-   gs4_get('https://docs.google.com/spreadsheets/d/1ZK7PmApXRzVgmeSY6i3Hf7rWLUsvJjVbgyJ4LAS0ECc/edit?usp=sharing')
+    sheet_append(Selfie, data = textB())
+    showNotification("Thanks for your feedback.")
+})
+```
 
 ## Column
 
@@ -89,15 +120,6 @@ datatable_cell <- function(df, type, reg){
 ![](processed_data/by_region_map.png)
 
 # By type and stage
-
-## Inputs {.sidebar}
-
-<br>
-
--   This dashboard contains two Maps and Provincial and Regional analyses of Major Projects.
--   You can navigate to these sections by clicking on the header bar.
--   The data used in the Provincial and Regional analyses can be downloaded from the table tab.
--   All data retrieved from [British Columbia's Major Project Inventory](https://www2.gov.bc.ca/gov/content/employment-business/economic-development/industry/bc-major-projects-inventory/recent-reports).
 
 ## Column
 
@@ -199,226 +221,4 @@ DT::renderDataTable(server=FALSE,{
 })%>%
   bindCache(input$table, input$region)
 ```
-
-# Find a project
-
-## {data-height=100}
-
-<br>
-
-*  You can either drill down OR find a project by name.
-*  Once a *single* project is displayed below, details available on next page.
-
-## {data-height=100}
-
-```{r}
-selectizeGroupUI(
-        id = "my-filters",
-        inline = TRUE,
-        params = list(
-          var_one = list(inputId = "region", title = "Region", placeholder = 'select'),
-          var_two = list(inputId = "municipality", title = "Municipality", placeholder = 'select'),
-          var_three = list(inputId = "project_type", title = "Project Type", placeholder = 'select'),
-          var_four = list(inputId = "project_category_name", title = "Project Category", placeholder = 'select'),
-          var_five = list(inputId = "public_funding_ind", title = "Public Funding", placeholder = 'select'),
-          var_six = list(inputId = "project_name", title = "Project Name", placeholder = 'select')
-        )
-      )
-
-res_mod <- callModule(
-      module = selectizeGroupServer,
-      id = "my-filters",
-      data = short,
-      vars = c("region", "municipality", "project_type","project_category_name", "public_funding_ind","project_name")
-    )
-# function render() needs to be defined after res_mod() otherwise R thinks res_mod() is a (missing) function not a Module.---------
-render <- function(var){
-  shiny::renderUI({
-    if(length(unique(res_mod()$project_name))==1){
-    res_mod()%>%
-      pull({{  var  }})%>%
-      last()
-    }
-  })
-} 
-```
-
-## {data-height=800}
-
-```{r}
-renderTable({
-  df <- res_mod()%>%
-    distinct(project_id, project_name, estimated_cost, region, municipality, project_type, project_category_name, public_funding_ind)%>%
-    select(region, municipality, project_type, project_category_name, public_funding_ind, project_name, estimated_cost, project_id)%>%
-    arrange(desc(estimated_cost))
-  df <- df%>%
-    mutate(project_id=as.character(project_id),
-           estimated_cost=scales::dollar(estimated_cost, accuracy = 1, suffix = "(M)")
-           )
-  colnames(df) <- stringr::str_to_title(stringr::str_replace_all(colnames(df),"_"," "))
-  df
-  }) 
-```
-
-
-# Project Details
-
-## Inputs {.sidebar}
-
-<br>
-
-*  Choose a *single* project on the Find a project page.
-
-
-Row {data-height=300}
--------------------------------------
-    
-### Description
- 
-```{r}
-shiny::renderUI({
-  if(length(unique(res_mod()$project_name))==1){
-  description <- res_mod()%>%
-    pull(project_description)%>%
-    last()
-  name <- res_mod()%>%
-    pull(project_name)%>%
-    last()
-  HTML(paste0("<b>",name,":</b> ", description))
-  }
-})
-```   
-
-Row {data-height=150}
--------------------------------------
-    
-### Estimated Cost:
-
-```{r}
-shiny::renderUI({
-  if(length(unique(res_mod()$project_name))==1){
-  res_mod()%>%
-    pull(estimated_cost)%>%
-    last()%>%
-    scales::dollar(suffix = " (M)")
-  }
-})
-```
-    
-### Construction Type:
-
-```{r}
-render(construction_type)
-```
-
-### Construction Subtype:
-
-```{r}
-render(construction_subtype)
-```
-
-### Project Type:
-
-```{r}
-render(project_type)
-```
-
-### Project Category:
-
-```{r}
-render(project_category_name)
-```
-
-### Telephone:
-
-```{r}
-render(telephone)
-```
-
-### Region:
-
-```{r}
-render(region)
-```
-
-
-Row {data-height=150}
--------------------------------------
-  
-### Municipality:
-
-```{r}
-render(municipality)
-```  
-
-### Project ID:
-
-```{r}
-render(project_id)
-```
-
-### Developer:
-
-```{r}
-render(developer)
-```
-
-### Public Funding:
-
-```{r}
-render(public_funding_ind)
-```
-
-### Green Building:
-
-```{r}
-render(green_building_ind)
-```
-
-### Clean Energy:
-
-```{r}
-render(clean_energy_ind)
-```
-
-### Indigenous:
-
-```{r}
-render(indigenous_ind)
-```
-
-
-Row
--------------------------------------
-    
-### Project Status:
-
-```{r}
-renderPlot({
-  if(length(unique(res_mod()$project_name))==1){
-  res_mod()%>%
-    ggplot(aes(last_update, project_status))+
-  geom_point()+
-  scale_x_date(date_labels = "%Y %b %d",name = NULL)+
-  scale_y_discrete(name=NULL, drop=FALSE)  
-  }
-})
-```
-
-
-### Project Stage:
-
-```{r}
-renderPlot({
-  if(length(unique(res_mod()$project_name))==1){
-  res_mod()%>%
-    ggplot(aes(last_update, project_stage))+
-  geom_point()+
-  scale_x_date(date_labels = "%Y %b %d",name = NULL)+
-  scale_y_discrete(name=NULL, drop=FALSE) 
-  }
-})
-```
-
-
 

@@ -62,16 +62,16 @@ subtype_and_status_plot <- function(df){
 #plot02.1b---------
 plot02.1b <- function(df){
   df <- df%>%
-    group_by(project_category_name, quarter)%>%
+    group_by(project_category, quarter)%>%
     summarize(`Estimated Costs (M)`= sum(estimated_cost, na.rm=TRUE))%>%
     mutate(quarter=yq(quarter))
   plt <- ggplot(df,
                 aes(quarter,
                     `Estimated Costs (M)`,
-                    fill = fct_reorder(project_category_name,`Estimated Costs (M)`, mean),
-                    group=fct_reorder(project_category_name,`Estimated Costs (M)`, mean),
+                    fill = fct_reorder(project_category,`Estimated Costs (M)`, mean),
+                    group=fct_reorder(project_category,`Estimated Costs (M)`, mean),
                     text = paste(
-                      "\nIn", tsibble::yearquarter(quarter),"total project costs for\n", str_to_lower(project_category_name),
+                      "\nIn", tsibble::yearquarter(quarter),"total project costs for\n", str_to_lower(project_category),
                       "was", scales::comma(`Estimated Costs (M)`), "Million.")))+
     geom_area()+
     scale_y_continuous(labels = scales::comma)+

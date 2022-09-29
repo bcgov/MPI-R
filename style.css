@@ -8,3 +8,8 @@
 .navbar-inverse .navbar-nav>.active>a, .navbar-inverse .navbar-nav>.active>a:hover, .navbar-inverse .navbar-nav>.active>a:focus {
      background-color: #1f4181;
 }
+.shiny-notification {
+             position:fixed;
+             top: calc(80%);
+             left: calc(20%);
+             }
