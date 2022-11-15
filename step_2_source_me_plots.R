@@ -15,6 +15,7 @@
 #libraries-----
 if(!"tidyverse" %in% names(sessionInfo()$otherPkgs)) library(tidyverse)
 if(!"lubridate" %in% names(sessionInfo()$otherPkgs)) library(lubridate) #years and months not exported objects
+if(!"wrapR" %in% names(sessionInfo()$otherPkgs)) library(wrapR)
 source(here::here("R", "functions_plot_making.R"))
 #read in the dataframes--------
 short <- readRDS(here::here("processed_data", "mpi_shortraw.rds"))

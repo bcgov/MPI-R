@@ -62,7 +62,7 @@ extract_all_regions_cell <- function(df, name){
 datatable_cell <- function(df, type, reg){
   df <- df%>%
     filter(region==reg)%>%
-    select(type)%>%
+    select(all_of(type))%>%
     pull()
   df<- df[[1]]
   if(is.data.frame(df)){

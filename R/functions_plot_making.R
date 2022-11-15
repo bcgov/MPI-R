@@ -21,7 +21,7 @@ lfq_plot <- function(df, var){
     scale_fill_viridis_d()+
     labs(fill=substitute(var))+
     theme_minimal()
-  aest::aest_fix_labs(plt)%>%
+  fix_labs(plt)%>%
     plotly::ggplotly(tooltip="text")%>%
     plotly::config(displayModeBar = F)
 }
@@ -54,7 +54,7 @@ subtype_and_status_plot <- function(df){
     labs(x="Project Status",
          y="Construction Subtype")
 
-  aest::aest_fix_labs(plt)%>%
+  fix_labs(plt)%>%
     plotly::ggplotly(tooltip="text")%>%
     plotly::config(displayModeBar = F)
 }
@@ -78,7 +78,7 @@ plot02.1b <- function(df){
     scale_fill_viridis_d()+
     labs(fill="Project Category Name")+
     theme_minimal()
-  aest::aest_fix_labs(plt)%>%
+  fix_labs(plt)%>%
     plotly::ggplotly(tooltip="text")%>%
     plotly::config(displayModeBar = F)
 }
@@ -104,7 +104,7 @@ plot02.3 <- function(df){
          y="Construction type")+
     theme(axis.text.x = element_text(angle = 45))
 
-  aest::aest_fix_labs(plt)%>%
+  fix_labs(plt)%>%
     plotly::ggplotly(tooltip="text")%>%
     plotly::config(displayModeBar = F)
 }
@@ -134,7 +134,7 @@ plt <-  ggplot(df, aes(quarter,
    theme(axis.text.x = element_text(angle=45, vjust=1, hjust=1))+
    labs(fill="Project Status")
 
-aest::aest_fix_labs(plt)%>%
+fix_labs(plt)%>%
   plotly::ggplotly(tooltip = "text")%>%
   plotly::config(displayModeBar = F)
 }
@@ -160,7 +160,7 @@ plot_agg_val_by_status <- function(df){
    scale_fill_viridis_d()+
    theme_minimal()+
    labs(fill="project_status")
- aest::aest_fix_labs(plt)%>%
+ fix_labs(plt)%>%
    plotly::ggplotly(tooltip = "text")%>%
    plotly::config(displayModeBar = F)
 
@@ -187,7 +187,7 @@ plt <- ggplot(last_quarter, aes(x = estimated_cost,
          x="Estimated Costs (M)")+
   facet_wrap(~fct_reorder(status_stage,years_in_inventory,mean))
 
-aest::aest_fix_labs(plt)%>%
+  fix_labs(plt)%>%
   plotly::ggplotly(tooltip = "text")%>%
   plotly::config(displayModeBar = F)
 }
