@@ -7,6 +7,7 @@ lfq_plot <- function(df, var){
     summarize(`Estimated Costs (M)` = sum(estimated_cost, na.rm=TRUE))%>%
     arrange(quarter)%>%
     mutate(quarter=yq(quarter))
+ # browser()
   plt <- ggplot(df,
                 aes(quarter,
                     `Estimated Costs (M)`,
@@ -19,11 +20,13 @@ lfq_plot <- function(df, var){
     geom_area()+
     scale_y_continuous(labels = scales::comma)+
     scale_fill_viridis_d()+
-    labs(fill=substitute(var))+
+    labs(fill=substitute(var),
+         title="")+
     theme_minimal()
-  fix_labs(plt)%>%
-    plotly::ggplotly(tooltip="text")%>%
-    plotly::config(displayModeBar = F)
+#  plt%>%
+ fix_labs(plt)%>%
+   plotly::ggplotly(tooltip="text")%>%
+   plotly::config(displayModeBar = F)
 }
 #subtype_and_status_plot---------
 subtype_and_status_plot <- function(df){

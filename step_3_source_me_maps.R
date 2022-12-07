@@ -12,6 +12,7 @@
 
 #This script takes data from the file mpi_shortraw.rds makes a couple choropleths and saves them as an Rds object.
 if(!"tidyverse" %in% names(sessionInfo()$otherPkgs)) library(tidyverse)
+library(leaflet)
 #functions-----------
 create_map <- function(df, var, facet=TRUE){
   plt <-  ggplot(data=df)+
@@ -57,12 +58,23 @@ by_region_map <- create_map(aggregated, `Total Project Cost (M)`, facet=FALSE)+
   ggsflabel::geom_sf_label_repel(data=aggregated[-c(6,7,8,9,10,13),], aes(label = paste(str_to_title(str_replace_all(region,"_"," ")), scales::dollar(`Total Project Cost (M)`, suffix=" (M)"), sep="\n")))
 by_region_type_and_stage_map <- create_map(disaggregated, `Total Project Cost (M)`)
 
+long_aggregated <- last_quarter_aggregated%>%
+  pivot_longer(cols=-region, names_to = "name", values_to = "value")%>%
+  mutate(region=str_replace_all(region, "mainland_southwest", "mainland_south_west"),
+         region=str_replace_all(region, "nechako", "north_coast_&_nechako"),
+         region=str_replace_all(region, "north_coast", "north_coast_&_nechako"),
+         region=str_replace_all(region, "northeast", "north_east"))
+
+saveRDS(long_aggregated, here::here("processed_data", "long_aggregated.rds"))
+
 ggsave(here::here("processed_data", "by_region_map.png"),
        by_region_map,
        width=12,
        height=8,
        units="in",
        dpi="retina")
+
+
 ggsave(here::here("processed_data", "by_region_type_and_stage_map.png"),
        by_region_type_and_stage_map,
        width=12,

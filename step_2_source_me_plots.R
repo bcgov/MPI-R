@@ -38,6 +38,8 @@ all_regions_plots <- tibble(name = "all_regions", data = list(short))%>%
                values_to = "value")%>%
   select(-name)%>%
   arrange(thing_name)
+
+
 #regional analysis---------
 by_region_plots <- short%>%
   group_by(region)%>%

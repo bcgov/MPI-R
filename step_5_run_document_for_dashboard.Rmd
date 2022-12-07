@@ -15,8 +15,10 @@ resource_files:
 - processed_data/all_regions_tables.rds
 - processed_data/all_regions_plots.rds
 - processed_data/mpi_shortraw.rds
-- .secrets/9566fe0643cfe888fecd0b72f870afec_rich.p.martin@gmail.com
 - .Rprofile
+- processed_data/long_aggregated.rds
+- processed_data/long_aggregated.rds
+- .secrets/d67d4efb39eee449dc62932502fd8a0f_rich.p.martin@gmail.com
 ---
 
 ```{r global, include=FALSE}
@@ -42,7 +44,7 @@ by_region_tables <- readRDS(here::here("processed_data","by_region_tables.rds"))
 all_regions_tables <- readRDS(here::here("processed_data","all_regions_tables.rds"))
 by_region_plots <- readRDS(here::here("processed_data","by_region_plots.rds"))
 all_regions_plots <- readRDS(here::here("processed_data","all_regions_plots.rds"))
-
+long_aggregated <- readRDS(here::here("processed_data","long_aggregated.rds"))
 #functions------------
 #Extractor function (retrieve cell) for all_regions_* dataframes---------- 
 extract_all_regions_cell <- function(df, name){
@@ -117,7 +119,10 @@ observeEvent(input$submit, {
 
 ### MPI by region in `r max(all_regions_tables[[2]][[2]]$quarter)`:
 
-![](processed_data/by_region_map.png)
+```{r}
+wrapR::bc_reg_choro(long_aggregated, region, name, value, "comma")
+```
+
 
 # By type and stage
 
